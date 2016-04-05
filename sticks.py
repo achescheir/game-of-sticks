@@ -47,7 +47,22 @@ class User_Player(Player):
     def lose(self):
         print("Sorry, {} you lose.".format(self.name))
 
-# class AI_Player(Player):
+class AI_Player(Player):
+    def __init__(self,verbose=True):
+        self.hats = {}
+        self.this_game = {}
+        self.verbose = verbose
+
+    def default_hat(self):
+        return [1,2,3]
+
+    def get_choice(self,number_of_sticks):
+        hat_contents = self.hats.get(number_of_sticks,default_hat())
+        my_choice = random.choice(hat_contents)
+        this_game[number_of_sticks] = my_choice
+        if verbose:
+            prit
+        return my_choice
 
 
 
