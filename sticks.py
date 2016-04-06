@@ -117,27 +117,37 @@ def get_pile_size(min_size, max_size):
     return size
 
 def main():
+    starting_pile = get_pile_size(10,100)
+    game_type = 'not in pea'
+    while game_type not in 'pea':
+        user_input = input("Do you want to play against another (P)layer, an (E)asy AI or and (A)vanced AI? ")
+        game_type = user_input[0].lower()
     players = []
-    # for name in ["Player 1", 'Player 2']:
-    #     players.append(User_Player(name))
-    players.append(AI_Player("Player 1",False))
-    players.append(AI_Player("Player 2",False))
-    for x in range(10000):
-        game = StickGame(25,players)
-        game.play()
-    players[0] = User_Player("Player 1")
-    players[1].verbose = True
+    if game_type == 'a':
+        players.append(AI_Player("TrainingAI",False))
+        players.append(AI_Player("AI",False))
+        print("Training....")
+        for x in range(1000):
+            game = StickGame(starting_pile,players)
+            game.play()
+        players[0] = User_Player("Player 1")
+        players[1].verbose = True
+    elif game_type == 'e':
+        players.append(User_Player("Player 1"))
+        players.append(AI_Player("AI"))
+    elif game_type == 'p' :
+        players = [User_Player("Player 1"),User_Player("Player 2")]
     while True:
-        game = StickGame(25,players)
+        game = StickGame(starting_pile,players)
         game.play()
-        if input("Play again? ") == 'n':
+        if input("Play again? ")[0].lower() == 'n':
             break
-    for x in range(1,26):
-        this_hat = players[1].hats.get(x,[1,2,3])
-        ones = sum([1 for x in this_hat if x ==1])
-        twos = sum([1 for x in this_hat if x ==2])
-        threes = sum([1 for x in this_hat if x ==3])
-        print("{}> 1:{}    2:{}    3:{}".format(x,ones,twos,threes))
+    # for x in range(1,26):
+    #     this_hat = players[1].hats.get(x,[1,2,3])
+    #     ones = sum([1 for x in this_hat if x ==1])
+    #     twos = sum([1 for x in this_hat if x ==2])
+    #     threes = sum([1 for x in this_hat if x ==3])
+    #     print("{}> 1:{}    2:{}    3:{}".format(x,ones,twos,threes))
 
 
 
