@@ -6,7 +6,9 @@ class StickGame:
         self.players = players
 
     def play(self):
-        player_index = 0
+        player_index = random.choice(range(len(self.players)))
+        for player in self.players:
+            player.start_game()
         while True:
             sticks_chosen = self.players[player_index].get_choice(self.number_of_sticks)
             self.number_of_sticks -= sticks_chosen
@@ -16,6 +18,14 @@ class StickGame:
             player_index += 1
             if player_index >= len(self.players):
                 player_index = 0
+        loser = player_index
+        while True:
+            player_index += 1
+            if player_index >= len(self.players):
+                player_index = 0
+            if player_index == loser:
+                break
+            self.players[player_index].win()
 
 class Player:
     def get_choice(self, number_of_sticks):
@@ -25,6 +35,9 @@ class Player:
         pass
 
     def win(self):
+        pass
+
+    def start_game(self):
         pass
 
 class User_Player(Player):
@@ -48,7 +61,8 @@ class User_Player(Player):
         print("Sorry, {} you lose.".format(self.name))
 
 class AI_Player(Player):
-    def __init__(self,verbose=True):
+    def __init__(self, name, verbose=True):
+        self.name = name
         self.hats = {}
         self.this_game = {}
         self.verbose = verbose
@@ -57,13 +71,37 @@ class AI_Player(Player):
         return [1,2,3]
 
     def get_choice(self,number_of_sticks):
-        hat_contents = self.hats.get(number_of_sticks,default_hat())
+        hat_contents = self.hats.get(number_of_sticks, self.default_hat())
         my_choice = random.choice(hat_contents)
-        this_game[number_of_sticks] = my_choice
-        if verbose:
-            prit
+        self.this_game[number_of_sticks] = my_choice
+        if self.verbose:
+            print("There are {} sticks in the pile.".format(number_of_sticks))
+            print("{}: How many do you want to pick up (1-{})? {}".format(self.name, min(number_of_sticks, 3), my_choice))
         return my_choice
 
+    def start_game(self):
+        self.this_game = {}
+
+    def win(self):
+        for each_hat in self.this_game:
+            if each_hat in self.hats:
+                self.hats[each_hat].append(self.this_game[each_hat])
+            else:
+                self.hats[each_hat] = self.default_hat()
+                self.hats[each_hat].append(self.this_game[each_hat])
+        self.this_game = {}
+
+    def lose(self):
+        for each_hat in self.this_game:
+            if each_hat in self.hats:
+                self.hats[each_hat].remove(self.this_game[each_hat])
+        for each_hat in self.hats:
+            for each_ball in range(1,4):
+                if each_ball not in self.hats[each_hat]:
+                    self.hats[each_hat].append(each_ball)
+        if(self.verbose):
+            print("Sorry {}, you lose.".format(self.name))
+        self.this_game = {}
 
 
 def get_pile_size(min_size, max_size):
@@ -80,10 +118,27 @@ def get_pile_size(min_size, max_size):
 
 def main():
     players = []
-    for name in ["Player 1", 'Player 2']:
-        players.append(User_Player(name))
-    game = StickGame(get_pile_size(10,100),players)
-    game.play()
+    # for name in ["Player 1", 'Player 2']:
+    #     players.append(User_Player(name))
+    players.append(AI_Player("Player 1",False))
+    players.append(AI_Player("Player 2",False))
+    for x in range(10000):
+        game = StickGame(25,players)
+        game.play()
+    players[0] = User_Player("Player 1")
+    players[1].verbose = True
+    while True:
+        game = StickGame(25,players)
+        game.play()
+        if input("Play again? ") == 'n':
+            break
+    for x in range(1,26):
+        this_hat = players[1].hats.get(x,[1,2,3])
+        ones = sum([1 for x in this_hat if x ==1])
+        twos = sum([1 for x in this_hat if x ==2])
+        threes = sum([1 for x in this_hat if x ==3])
+        print("{}> 1:{}    2:{}    3:{}".format(x,ones,twos,threes))
+
 
 
 if __name__ == '__main__':
